@@ -29,4 +29,13 @@
 // TraceContext propagator as process globals; Shutdown flushes and releases
 // them. It registers at lifecycle stage 0 with no readiness check:
 // observability never gates readiness.
+//
+// # Log correlation
+//
+// [NewTraceHandler] wraps a slog.Handler — the intended one is the handler
+// behind go-core's logging.New, via the logger's Handler method — and
+// appends trace_id and span_id to a record logged under a context carrying
+// a valid span context, so a log line and the span it happened inside share
+// a key every other signal joins on. A record logged with no active span
+// passes through unchanged.
 package observability

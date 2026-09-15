@@ -29,8 +29,11 @@ is added when it is about to be built.
   composition root rather than constructing either itself — the trace exporter and the metric
   reader are already-built SDK values, so this package stays free of the `otlp` sub-module's
   weight. No readiness check, per the design's posture rule.
-- **The correlating `slog.Handler`** — wraps `go-core/logging.New`'s handler, appending `trace_id`
-  and `span_id` from a request's span context when valid. Not yet built.
+- **The correlating `slog.Handler`** (`NewTraceHandler`) — wraps any `slog.Handler`, appending
+  `trace_id` and `span_id` from a request's span context when valid; a record with no active
+  span passes through unchanged. Built. Under `WithGroup`, the two attributes nest inside the
+  opened group like any attribute added afterward — standard `slog` semantics, and nothing in the
+  workspace opens a group on a correlated logger yet.
 - **The HTTP server middleware** — a constructor over `Config` wrapping `otelhttp.NewMiddleware`,
   structurally a `func(http.Handler) http.Handler` with no `go-web-sdk` import. Not yet built.
 - **The request-ID source function** — `func(*http.Request) string`, returning the request's
