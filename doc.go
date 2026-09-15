@@ -38,4 +38,17 @@
 // a valid span context, so a log line and the span it happened inside share
 // a key every other signal joins on. A record logged with no active span
 // passes through unchanged.
+//
+// # HTTP server middleware
+//
+// [NewMiddleware] wraps otelhttp.NewMiddleware as a plain
+// func(http.Handler) http.Handler, structurally go-web-sdk's Middleware type
+// without importing that module. The wrapped handler runs inside a server
+// span carrying the HTTP semantic-convention attributes, continues a trace
+// an incoming traceparent header names, and records the request-duration
+// histogram. It resolves its tracer and meter provider from the otel
+// globals rather than taking them as parameters, which is safe to construct
+// before [Telemetry.Start] installs the real ones: the pre-installation
+// globals are delegating proxies that route to the real providers the
+// moment Start installs them.
 package observability

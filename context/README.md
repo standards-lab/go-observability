@@ -34,8 +34,14 @@ is added when it is about to be built.
   span passes through unchanged. Built. Under `WithGroup`, the two attributes nest inside the
   opened group like any attribute added afterward — standard `slog` semantics, and nothing in the
   workspace opens a group on a correlated logger yet.
-- **The HTTP server middleware** — a constructor over `Config` wrapping `otelhttp.NewMiddleware`,
-  structurally a `func(http.Handler) http.Handler` with no `go-web-sdk` import. Not yet built.
+- **The HTTP server middleware** (`NewMiddleware`) — a constructor over `Config` wrapping
+  `otelhttp.NewMiddleware`, structurally a `func(http.Handler) http.Handler` with no
+  `go-web-sdk` import. Built. Resolves its tracer/meter provider from the `otel` globals rather
+  than taking them explicitly, which is safe even when the middleware is constructed before
+  `Telemetry.Start` runs — the pre-installation globals are delegating proxies. The operation
+  name passed to `otelhttp.NewMiddleware` (`ResourceAttributes["service.name"]`) doesn't
+  currently affect span naming under the default formatter; kept anyway since it costs nothing
+  and is the right input if a custom formatter is ever added.
 - **The request-ID source function** — `func(*http.Request) string`, returning the request's
   current trace id, the shape `go-web-sdk`'s `web.RequestID(WithIDSource(...))` takes. Not yet
   built.
