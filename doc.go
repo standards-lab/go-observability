@@ -51,4 +51,14 @@
 // before [Telemetry.Start] installs the real ones: the pre-installation
 // globals are delegating proxies that route to the real providers the
 // moment Start installs them.
+//
+// # Request-ID source
+//
+// [RequestIDSource] is the func(*http.Request) string go-web-sdk's
+// middleware.WithIDSource takes: it returns the request's current trace id
+// when one is on the request's context, or "" to decline and let
+// middleware.RequestID fall through to its next source. It reads a span
+// already on the request; reaching one depends on the composition root
+// wiring [NewMiddleware] ahead of go-web-sdk's RequestID middleware in the
+// chain. Neither module imports the other.
 package observability

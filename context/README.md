@@ -42,7 +42,9 @@ is added when it is about to be built.
   name passed to `otelhttp.NewMiddleware` (`ResourceAttributes["service.name"]`) doesn't
   currently affect span naming under the default formatter; kept anyway since it costs nothing
   and is the right input if a custom formatter is ever added.
-- **The request-ID source function** — `func(*http.Request) string`, returning the request's
-  current trace id, the shape `go-web-sdk`'s `web.RequestID(WithIDSource(...))` takes. Not yet
-  built.
+- **`RequestIDSource`** — `func(*http.Request) string`, returning the request's current trace id
+  or `""` to decline, the shape `go-web-sdk`'s `middleware.RequestID(WithIDSource(...))` takes.
+  Built. It only reads a span already on the request; the composition root reaching one at all
+  depends on wiring `NewMiddleware` ahead of `RequestID` in the chain — a later task's concern
+  (`v1.observability.tasks.instrumentation`), not this one's.
 - **`otlp`** — the gRPC trace and metric exporter constructors. Not yet built.
