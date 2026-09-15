@@ -29,6 +29,16 @@ the standard's principles it enhances are stated below. Its repository-level pri
 - Observability never gates readiness: `Telemetry` registers with the process lifecycle through a
   `Start` and a `Shutdown`, and no health check.
 
+## Packages
+
+- `observability` (the base module's root package) — `Config`, on go-core's Merge-and-Finalize
+  contract; `Telemetry`, the process lifecycle service that builds the resource and the
+  providers; `NewTraceHandler`, the trace-correlating `slog.Handler`; `NewMiddleware`, the HTTP
+  server instrumentation; and `RequestIDSource`, the trace-id source `go-web-sdk`'s
+  `middleware.WithIDSource` takes.
+- `otlp` — the gRPC trace and metric exporter constructors, connecting in plain text (TLS is
+  deferred until a deployed or managed backend needs it — `otlp`'s own `doc.go` states why).
+
 ## Development
 
 The repository uses a Go workspace and [mise](https://mise.jdx.dev):
