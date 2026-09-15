@@ -17,8 +17,12 @@ this context records only working knowledge the code and the README do not expre
 The built packages are authoritative through their code and `doc.go`. Detail for what is unbuilt
 is added when it is about to be built.
 
-- **`Config`** — the collector endpoint and protocol, headers, trace sampling ratio, and resource
-  attributes, on `go-core`'s Merge-and-Finalize contract. Not yet built.
+- **`Config`** — the collector endpoint, headers, trace sampling ratio, and resource attributes,
+  on `go-core`'s Merge-and-Finalize contract. Built. No protocol field: the `otlp` sub-module
+  ships gRPC exporters alone for the first release, so a field with one valid value would be
+  dead configuration; the field returns if HTTP/protobuf is ever added — a narrowing of
+  `observability-strategy.md`'s "endpoint and protocol," recorded here since the design note
+  itself is promoted, not restated, per `context-architecture.md`.
 - **`Telemetry`** — the `lifecycle.Service` at stage 0: builds the `resource.Resource`, constructs
   the `TracerProvider` and `MeterProvider`, installs them and the W3C `TraceContext` propagator as
   process globals, flushes on shutdown. Not yet built.
