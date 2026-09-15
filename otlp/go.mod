@@ -2,14 +2,8 @@ module github.com/standards-lab/go-observability/otlp
 
 go 1.27
 
-// Transient bridge while this module builds against unreleased base changes:
-// the base module has no release yet, so the standalone build (GOWORK=off)
-// resolves it from the parent directory. Dropped at the release stage, when
-// the require below pins the released base version.
-replace github.com/standards-lab/go-observability => ../
-
 require (
-	github.com/standards-lab/go-observability v0.0.0-00010101000000-000000000000
+	github.com/standards-lab/go-observability v0.1.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.46.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.46.0
 	go.opentelemetry.io/otel/sdk v1.46.0
