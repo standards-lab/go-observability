@@ -25,7 +25,10 @@ is added when it is about to be built.
   itself is promoted, not restated, per `context-architecture.md`.
 - **`Telemetry`** — the `lifecycle.Service` at stage 0: builds the `resource.Resource`, constructs
   the `TracerProvider` and `MeterProvider`, installs them and the W3C `TraceContext` propagator as
-  process globals, flushes on shutdown. Not yet built.
+  process globals, flushes on shutdown. Built. Takes an `Exporters{Trace, Metric}` pair from the
+  composition root rather than constructing either itself — the trace exporter and the metric
+  reader are already-built SDK values, so this package stays free of the `otlp` sub-module's
+  weight. No readiness check, per the design's posture rule.
 - **The correlating `slog.Handler`** — wraps `go-core/logging.New`'s handler, appending `trace_id`
   and `span_id` from a request's span context when valid. Not yet built.
 - **The HTTP server middleware** — a constructor over `Config` wrapping `otelhttp.NewMiddleware`,

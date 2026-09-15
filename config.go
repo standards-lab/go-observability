@@ -104,3 +104,7 @@ func (c *Config) validate() error {
 	}
 	return nil
 }
+
+func (c *Config) finalized() bool {
+	return c.SampleRatio != nil
+}
