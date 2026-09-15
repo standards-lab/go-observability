@@ -47,4 +47,4 @@ is added when it is about to be built.
   Built. It only reads a span already on the request; the composition root reaching one at all
   depends on wiring `NewMiddleware` ahead of `RequestID` in the chain — a later task's concern
   (`v1.observability.tasks.instrumentation`), not this one's.
-- **`otlp`** — the gRPC trace and metric exporter constructors. Not yet built.
+- **`otlp`** — the gRPC trace and metric exporter constructors (`NewTraceExporter`, `NewMetricExporter`). Built. Both connect in plain text unconditionally: `Config` has no TLS field yet, and the only OTLP target in the workspace so far is the local compose collector stack, which nothing secures with TLS. TLS support is deferred until a deployed or managed backend needs it.
