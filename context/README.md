@@ -16,11 +16,9 @@ Every package is built, and its code and `doc.go` are authoritative. Detail for 
 is added when it is about to be built.
 
 - **`Config`** has no protocol field, because `otlp` ships gRPC exporters alone and a field with
-  one valid value would be dead configuration. The field arrives with HTTP/protobuf exporters.
-- **`otlp`** connects in plain text. TLS arrives, with its `Config` field, when a deployed or
-  managed backend needs it.
+  one valid value would be dead configuration. The field is added if HTTP/protobuf exporters are.
 - **`NewMiddleware`** passes `service.name` as `otelhttp`'s operation name. The default span
   formatter ignores it; a custom formatter would use it.
 - **The logs pipeline** (`otel/log`, `otel/sdk/log`, the `slog` bridge, and an OTLP log exporter)
-  is planned for when `otel/log` reaches a stable v1, with the log exporter joining the others in
-  `otlp`.
+  is planned for when `otel/log` reaches a stable v1. The log exporter will join the other
+  exporters in `otlp`.

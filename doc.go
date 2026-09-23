@@ -2,10 +2,10 @@
 // configuration block that names the collector, the process lifecycle
 // service that builds the resource and the providers, the trace-correlating
 // log handler, the HTTP server middleware, and the request-ID source
-// function. The package depends on the
-// standard library, go-core, and the stable v1 OpenTelemetry API and SDK; the
-// gRPC OTLP exporters and their dependency weight live in the otlp
-// sub-module, which this package never imports.
+// function. The package depends on the standard library, go-core, and the
+// stable v1 OpenTelemetry API and SDK; the gRPC OTLP exporters and their
+// dependency weight live in the otlp sub-module, which this package never
+// imports.
 //
 // # Configuration
 //
