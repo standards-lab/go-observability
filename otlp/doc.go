@@ -3,8 +3,8 @@
 // separate module because every OTLP exporter pulls go.opentelemetry.io/proto/otlp
 // and, behind it, grpc, protobuf, grpc-gateway, and genproto: a dependency
 // footprint the base module never imports, so an application that wants only
-// the tracer and meter interfaces never compiles it. The design note
-// observability-strategy.md (§1) records the split and its reasoning.
+// the tracer and meter interfaces never compiles it. The repository README's
+// Design section records the split and its reasoning.
 //
 // [NewTraceExporter] and [NewMetricExporter] each take the base module's
 // [observability.Config] and build one exporter over its Endpoint and
