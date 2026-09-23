@@ -30,6 +30,7 @@ the standard's principles it enhances are stated below. Its repository-level pri
   `Start` and a `Shutdown`, and no health check.
 
 ## Design
+
 **Standard tier only, no provider.** The standard is OpenTelemetry: its API and SDK, its semantic
 conventions, W3C Trace Context propagation, and OTLP on the wire. A backend sits behind the OTLP
 exporter, so nothing about the backend enters the dependency graph, and the library declares no
