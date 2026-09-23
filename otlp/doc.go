@@ -3,8 +3,8 @@
 // separate module because every OTLP exporter pulls go.opentelemetry.io/proto/otlp
 // and, behind it, grpc, protobuf, grpc-gateway, and genproto: a dependency
 // footprint the base module never imports, so an application that wants only
-// the tracer and meter interfaces never compiles it. The design note
-// observability-strategy.md (§1) records the split and its reasoning.
+// the tracer and meter interfaces never compiles it. The repository README's
+// Design section records the split and its reasoning.
 //
 // [NewTraceExporter] and [NewMetricExporter] each take the base module's
 // [observability.Config] and build one exporter over its Endpoint and
@@ -21,10 +21,9 @@
 // # Transport security
 //
 // Both exporters connect in plain text (the exporters' WithInsecure option),
-// unconditionally. [observability.Config] has no TLS field, and the only
-// OTLP target in the workspace so far is the local compose collector stack,
-// which nothing secures with TLS, so plain-text gRPC is the correct default
-// for that target and the only one Config currently expresses. TLS support
-// is deferred until a deployed or managed backend needs it, at which point
-// Config gains the field and these constructors honor it.
+// unconditionally. [observability.Config] has no TLS field: the OTLP target
+// the library is built against is the local compose collector stack, which
+// nothing secures with TLS. TLS support is planned for when a deployed or
+// managed backend needs it: Config gains the field, and these constructors
+// honor it.
 package otlp

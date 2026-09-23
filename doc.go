@@ -2,10 +2,10 @@
 // configuration block that names the collector, the process lifecycle
 // service that builds the resource and the providers, the trace-correlating
 // log handler, the HTTP server middleware, and the request-ID source
-// function (the last three land in later stages). The package depends on the
-// standard library, go-core, and the stable v1 OpenTelemetry API and SDK; the
-// gRPC OTLP exporters and their dependency weight live in the otlp
-// sub-module, which this package never imports.
+// function. The package depends on the standard library, go-core, and the
+// stable v1 OpenTelemetry API and SDK; the gRPC OTLP exporters and their
+// dependency weight live in the otlp sub-module, which this package never
+// imports.
 //
 // # Configuration
 //
@@ -27,8 +27,11 @@
 // the configured attributes merged over the SDK's own defaults, constructs
 // the TracerProvider and MeterProvider, and installs both and the W3C
 // TraceContext propagator as process globals; Shutdown flushes and releases
-// them. It registers at lifecycle stage 0 with no readiness check:
-// observability never gates readiness.
+// them. The composition root registers Start as a lifecycle startup hook
+// and Shutdown as a shutdown hook, so telemetry is installed before the
+// first numbered stage starts and flushed after the last drains, without
+// holding a stage of its own. It has no readiness check: observability
+// never gates readiness.
 //
 // # Log correlation
 //

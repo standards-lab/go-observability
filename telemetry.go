@@ -30,10 +30,11 @@ type Exporters struct {
 // performs no work beyond recording the configuration and exporters; Start
 // builds the resource and the providers and installs them as process
 // globals; Shutdown flushes and releases them. Start and Shutdown carry the
-// lifecycle hook signature, so the composition root registers the bare
-// method values at stage 0, ahead of everything else it starts. There is no
-// readiness check: observability never gates readiness, so a collector the
-// service cannot reach is never a reason to fail a probe.
+// lifecycle hook signature, so the composition root registers them as the
+// coordinator's startup and shutdown hooks: Start runs before every stage
+// starts, and Shutdown runs after every stage drains. There is no readiness
+// check: observability never gates readiness, so a collector the service
+// cannot reach is never a reason to fail a probe.
 type Telemetry struct {
 	sampleRatio float64
 	attributes  []attribute.KeyValue
