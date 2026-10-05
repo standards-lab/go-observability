@@ -22,11 +22,14 @@ var ErrEndpointRequired = errors.New("otlp: observability endpoint required")
 
 // NewTraceExporter builds the gRPC OTLP span exporter over cfg: it dials
 // cfg.Endpoint, sends cfg.Headers with every request, and connects in plain
-// text (see the package comment on transport security). The exporter dials
-// lazily, so construction succeeds with no collector listening; an
-// unreachable collector surfaces as export errors, never here. The result is
-// what [observability.Exporters].Trace takes. It returns
-// [ErrEndpointRequired] when cfg.Endpoint is empty.
+// text (see the package comment on transport security). The endpoint takes
+// precedence over the SDK's OTEL_EXPORTER_OTLP_* environment variables, so
+// cfg alone decides where the exporter sends. The exporter dials lazily, so
+// construction succeeds with no collector listening; an unreachable
+// collector surfaces as export errors, never here, which keeps a collector
+// that is down from blocking a service's startup. The result is what
+// [observability.Exporters].Trace takes. It returns [ErrEndpointRequired]
+// when cfg.Endpoint is empty.
 func NewTraceExporter(ctx context.Context, cfg observability.Config) (sdktrace.SpanExporter, error) {
 	if cfg.Endpoint == "" {
 		return nil, ErrEndpointRequired
@@ -43,8 +46,8 @@ func NewTraceExporter(ctx context.Context, cfg observability.Config) (sdktrace.S
 }
 
 // NewMetricExporter builds the gRPC OTLP metric exporter over cfg, with the
-// same endpoint, headers, plain-text transport, and lazy dial as
-// [NewTraceExporter]. It returns the raw exporter, not a reader:
+// same endpoint, headers, endpoint precedence, plain-text transport, and
+// lazy dial as [NewTraceExporter]. It returns the raw exporter, not a reader:
 // [observability.Exporters].Metric takes a reader, and the composition root
 // decides how the exporter becomes one, in production by wrapping it in
 // sdkmetric.NewPeriodicReader. It returns [ErrEndpointRequired] when
