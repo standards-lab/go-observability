@@ -92,8 +92,9 @@ logs move to OTLP, the backend's logs ingestion.
 The repository uses a Go workspace and [mise](https://mise.jdx.dev):
 
 ```
-mise run build   # build every module standalone, with the workspace off
-mise run test    # test every module
+mise run check      # build, vet, format, fix, tidy, test, and lint every module; writes nothing
+mise run currency   # report requirements, Go, tools, and actions behind their latest
+mise run upgrade    # upgrade requirements and tools to their latest
 ```
 
 ## License
