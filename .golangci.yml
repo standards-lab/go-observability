@@ -3,8 +3,13 @@ version: "2"
 
 linters:
   # The standard set (errcheck, govet, ineffassign, staticcheck, unused),
-  # plus testpackage, which keeps tests black-box. testpackage keeps its
-  # default skip regexp, so white-box tests live in *_internal_test.go.
+  # plus testpackage, which keeps tests black-box. Every test lives in its
+  # package's external _test package; the one white-box file allowed is
+  # export_test.go, which only exports a clock or probe hook the API can't
+  # reach deterministically.
   default: standard
   enable:
     - testpackage
+  settings:
+    testpackage:
+      skip-regexp: export_test\.go
