@@ -27,7 +27,9 @@ func TestNewEnv(t *testing.T) {
 }
 
 func TestNewEnv_EmptyPrefixReturnsZeroEnv(t *testing.T) {
-	if env := observability.NewEnv(""); env != (observability.Env{}) {
-		t.Errorf("NewEnv(\"\") = %+v, want the zero Env (overrides disabled)", env)
+	for _, prefix := range []string{"", " -_ "} {
+		if env := observability.NewEnv(prefix); env != (observability.Env{}) {
+			t.Errorf("NewEnv(%q) = %+v, want the zero Env (overrides disabled)", prefix, env)
+		}
 	}
 }
