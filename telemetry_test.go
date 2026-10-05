@@ -11,8 +11,8 @@ import (
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/standards-lab/go-observability"
 )
@@ -132,17 +132,31 @@ func TestNew_PanicsOnNilExporters(t *testing.T) {
 	})
 }
 
-func TestTelemetry_StartInstallsGlobals(t *testing.T) {
+func TestTelemetry_StartInstallsTraceContextPropagator(t *testing.T) {
+	// The installed providers are proved by the tests below, which reach the
+	// exporters only through the otel globals; this one proves the
+	// propagator by its wire behavior. An earlier test's Start leaves
+	// TraceContext behind the otel package's delegating global, so the test
+	// installs a propagator that injects nothing first: the assertions below
+	// then pass only if Start replaces it.
+	restoreGlobals(t)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator())
+
 	startTelemetry(t, 1)
 
-	if _, ok := otel.GetTracerProvider().(*sdktrace.TracerProvider); !ok {
-		t.Errorf("global TracerProvider = %T, want *sdktrace.TracerProvider", otel.GetTracerProvider())
+	carrier := propagation.MapCarrier{}
+
+	otel.GetTextMapPropagator().Inject(spanContext(), carrier)
+	want := "00-" + testTraceID.String() + "-" + testSpanID.String() + "-01"
+	if got := carrier.Get("traceparent"); got != want {
+		t.Errorf("injected traceparent = %q, want %q", got, want)
 	}
-	if _, ok := otel.GetMeterProvider().(*sdkmetric.MeterProvider); !ok {
-		t.Errorf("global MeterProvider = %T, want *sdkmetric.MeterProvider", otel.GetMeterProvider())
-	}
-	if _, ok := otel.GetTextMapPropagator().(propagation.TraceContext); !ok {
-		t.Errorf("global propagator = %T, want propagation.TraceContext", otel.GetTextMapPropagator())
+
+	// The same propagator extracts an incoming header back into a span context.
+	extracted := trace.SpanContextFromContext(otel.GetTextMapPropagator().Extract(context.Background(), carrier))
+	if extracted.TraceID() != testTraceID || extracted.SpanID() != testSpanID {
+		t.Errorf("extracted span context = %s/%s, want %s/%s",
+			extracted.TraceID(), extracted.SpanID(), testTraceID, testSpanID)
 	}
 }
 
