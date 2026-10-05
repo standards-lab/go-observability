@@ -17,11 +17,9 @@ type Env struct {
 // NewEnv composes the standard override names from a prefix under the
 // "observability" segment: OBSERVABILITY_ENDPOINT and
 // OBSERVABILITY_SAMPLE_RATIO, prefixed by whatever [config.EnvName] produces.
-// An empty prefix returns the zero Env, disabling the overrides.
+// An empty prefix, or one empty once sanitized, returns the zero Env,
+// disabling the overrides: [config.EnvName] composes no name from it.
 func NewEnv(prefix string) Env {
-	if prefix == "" {
-		return Env{}
-	}
 	return Env{
 		Endpoint: config.EnvName(
 			prefix, "observability", "endpoint",

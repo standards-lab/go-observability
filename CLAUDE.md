@@ -24,7 +24,7 @@ is promoted to the architecture repository through its `context/`.
   are the committed steady state; a `replace` directive is only a transient bridge while `otlp`
   builds against unreleased base changes.
 - **Standard conformance.** Dependencies, releases, CI, tests, and tasks follow the Go Elemental
-  standard principles in the architecture repository (base `v*` and `otlp/v*` tags, per-module CI
-  matrix, mise tasks looping over the modules).
+  standard principles in the architecture repository (base `v*` and `otlp/v*` tags, one CI job
+  running `mise run check`, mise tasks looping over the modules).
 - **Public repo.** Modules resolve through the public Go proxy; CI carries no private-module
   config.
