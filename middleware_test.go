@@ -9,7 +9,6 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/standards-lab/go-observability"
@@ -101,9 +100,9 @@ func TestNewMiddleware_InstrumentsRequests(t *testing.T) {
 
 func TestNewMiddleware_ConstructedBeforeStartStillInstruments(t *testing.T) {
 	// The premise: no real provider is installed when the middleware is
-	// built, only the otel package's delegating placeholder.
-	if _, ok := otel.GetTracerProvider().(*sdktrace.TracerProvider); ok {
-		t.Fatal("a real TracerProvider is installed before construction; the test would prove nothing")
+	// built, so a span started through the globals records nothing.
+	if _, span := otel.Tracer("premise").Start(context.Background(), "premise"); span.IsRecording() {
+		t.Fatal("a recording TracerProvider is installed before construction; the test would prove nothing")
 	}
 	mw := observability.NewMiddleware(finalizedConfig(t, 1))
 
