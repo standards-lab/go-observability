@@ -6,17 +6,14 @@
 // the tracer and meter interfaces never compiles it. The repository README's
 // Design section records the split and its reasoning.
 //
-// [NewTraceExporter] and [NewMetricExporter] each take the base module's
-// [observability.Config] and build one exporter over its Endpoint and
-// Headers. The explicit endpoint takes precedence over the SDK's
-// OTEL_EXPORTER_OTLP_* environment variables, so Config alone decides where
-// the exporters send. Both dial lazily: construction succeeds with no
-// collector listening, and an unreachable collector surfaces as export
-// errors rather than a construction failure, which keeps a collector that is
-// down from ever blocking a service's startup. The metric constructor returns
-// the raw exporter rather than a reader, because [observability.Exporters]
-// takes a reader and the composition root decides how the exporter becomes
-// one, in production by wrapping it in sdkmetric.NewPeriodicReader.
+// The package exports:
+//
+//   - [NewTraceExporter], which builds the span exporter for
+//     [observability.Exporters]
+//   - [NewMetricExporter], which builds the metric exporter the composition
+//     root wraps in a reader for [observability.Exporters]
+//   - [ErrEndpointRequired], the error both constructors return for a Config
+//     with no Endpoint
 //
 // # Transport security
 //
