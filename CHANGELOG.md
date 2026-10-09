@@ -7,10 +7,13 @@ module only; the `otlp` sub-module keeps its own.
 
 ## [Unreleased]
 
+## [v0.2.0] - 2026-10-09
+
 ### Changed
 
-- **Breaking:** The `go-core` requirement is v0.6.0. An importer still on `lifecycle.Service`,
-  `Add`, or stages breaks, since the requirement pulls v0.6.0 into its build.
+- **Breaking:** The `go-core` requirement is v0.7.0, whose logger writes each record's time in
+  UTC. It passes go-core v0.6.0's break on: an importer still on `lifecycle.Service`, `Add`, or
+  stages breaks, since the requirement pulls go-core v0.6.0's lifecycle into its build.
 - `*Telemetry` joins a graph-backed `lifecycle.Coordinator` as a node's value: the Coordinator
   infers from its methods that it is a `Starter` and a `Stopper`, so it needs no adapter. A node
   it instruments uses its node, or orders itself after it with `Scope.After`, so it starts first
@@ -46,5 +49,6 @@ is released on its own tags.
 - `RequestIDSource` — the `func(*http.Request) string` `go-web-sdk`'s
   `middleware.WithIDSource` takes, returning the request's current trace id or `""` to decline.
 
-[Unreleased]: https://github.com/standards-lab/go-observability/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/standards-lab/go-observability/compare/v0.2.0...HEAD
+[v0.2.0]: https://github.com/standards-lab/go-observability/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/standards-lab/go-observability/releases/tag/v0.1.0

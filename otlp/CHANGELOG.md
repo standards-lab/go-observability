@@ -7,6 +7,15 @@ covers this sub-module only; the base module keeps its own.
 
 ## [Unreleased]
 
+## [v0.2.0] - 2026-10-09
+
+### Changed
+
+- **Breaking:** The `go-observability` requirement is v0.2.0, which requires `go-core` v0.7.0.
+  An importer still on go-core's `lifecycle.Service`, `Add`, or stages breaks, since the
+  requirement pulls go-core v0.6.0's lifecycle into its build. The exporters' code is unchanged:
+  `Config` and `Exporters`, the base module's types they use, are unchanged in v0.2.0.
+
 ## [v0.1.0] - 2026-09-15
 
 The first release of the gRPC OTLP exporters, against `github.com/standards-lab/go-observability v0.1.0`.
@@ -19,5 +28,6 @@ The first release of the gRPC OTLP exporters, against `github.com/standards-lab/
   which nothing secures with TLS. TLS support is deferred until a deployed or managed backend
   needs it. Both dial lazily, so construction never blocks on a collector that isn't up yet.
 
-[Unreleased]: https://github.com/standards-lab/go-observability/compare/otlp/v0.1.0...HEAD
+[Unreleased]: https://github.com/standards-lab/go-observability/compare/otlp/v0.2.0...HEAD
+[v0.2.0]: https://github.com/standards-lab/go-observability/compare/otlp/v0.1.0...otlp/v0.2.0
 [v0.1.0]: https://github.com/standards-lab/go-observability/releases/tag/otlp/v0.1.0
