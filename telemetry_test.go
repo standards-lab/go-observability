@@ -2,6 +2,7 @@ package observability_test
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 
@@ -14,8 +15,14 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
 
+	"github.com/standards-lab/go-core/lifecycle"
+
 	"github.com/standards-lab/go-observability"
 )
+
+// A *Telemetry takes part in a lifecycle.Coordinator's startup and shutdown
+// as the Value of a graph.Dependency, with no adapter.
+var _ lifecycle.Subsystem = (*observability.Telemetry)(nil)
 
 // The tests that call Start install process globals in the otel package, so
 // none of them run in parallel and each restores the globals it replaced.
@@ -246,5 +253,38 @@ func TestTelemetry_ShutdownReleasesReader(t *testing.T) {
 	var rm metricdata.ResourceMetrics
 	if err := reader.Collect(context.Background(), &rm); err == nil {
 		t.Error("collect after shutdown succeeded, want an error")
+	}
+}
+
+// countingExporter is the SDK's in-memory exporter counting its Shutdown
+// calls, so a test sees whether Telemetry released it.
+type countingExporter struct {
+	*tracetest.InMemoryExporter
+	shutdowns int
+}
+
+func (e *countingExporter) Shutdown(context.Context) error {
+	e.shutdowns++
+	return nil
+}
+
+func TestTelemetry_ShutdownWithoutStartReleasesExporters(t *testing.T) {
+	// The Coordinator shuts down a participant whose Start failed or never
+	// ran. No provider owns the exporters then, so Shutdown releases them
+	// itself rather than leaking them.
+	exporter := &countingExporter{InMemoryExporter: tracetest.NewInMemoryExporter()}
+	reader := sdkmetric.NewManualReader()
+	tel := observability.New(finalizedConfig(t, 1), observability.Exporters{Trace: exporter, Metric: reader})
+
+	if err := tel.Shutdown(context.Background()); err != nil {
+		t.Fatalf("shutdown: %v", err)
+	}
+
+	if exporter.shutdowns != 1 {
+		t.Errorf("trace exporter shut down %d times, want 1", exporter.shutdowns)
+	}
+	// A reader shut down once reports ErrReaderShutdown on the next call.
+	if err := reader.Shutdown(context.Background()); !errors.Is(err, sdkmetric.ErrReaderShutdown) {
+		t.Errorf("second reader shutdown = %v, want ErrReaderShutdown", err)
 	}
 }

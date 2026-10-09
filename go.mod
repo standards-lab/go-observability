@@ -3,7 +3,7 @@ module github.com/standards-lab/go-observability
 go 1.27
 
 require (
-	github.com/standards-lab/go-core v0.5.0
+	github.com/standards-lab/go-core v0.6.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0
 	go.opentelemetry.io/otel v1.47.0
 	go.opentelemetry.io/otel/sdk v1.47.0

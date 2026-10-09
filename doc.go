@@ -27,11 +27,12 @@
 // the configured attributes merged over the SDK's own defaults, constructs
 // the TracerProvider and MeterProvider, and installs both and the W3C
 // TraceContext propagator as process globals; Shutdown flushes and releases
-// them. The composition root registers Start as a lifecycle startup hook
-// and Shutdown as a shutdown hook, so telemetry is installed before the
-// first numbered stage starts and flushed after the last drains, without
-// holding a stage of its own. It has no readiness check: observability
-// never gates readiness.
+// them. Telemetry implements go-core's lifecycle.Subsystem, so the
+// composition root makes it a graph node's value, and the nodes it should
+// instrument use it or order themselves after it with Scope.After: it then
+// sits in a lower layer, installed before they start and flushed after they
+// shut down. It has no readiness check: observability never gates
+// readiness.
 //
 // # Log correlation
 //

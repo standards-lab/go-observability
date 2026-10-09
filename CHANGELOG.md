@@ -7,6 +7,18 @@ module only; the `otlp` sub-module keeps its own.
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** The `go-core` requirement is v0.6.0. An importer still on `lifecycle.Service`,
+  `Add`, or stages breaks, since the requirement pulls v0.6.0 into its build.
+- `*Telemetry` joins a graph-backed `lifecycle.Coordinator` as a node's value: the Coordinator
+  infers from its methods that it is a `Starter` and a `Stopper`, so it needs no adapter. A node
+  it instruments uses its node, or orders itself after it with `Scope.After`, so it starts first
+  and shuts down last.
+- `Telemetry.Shutdown` releases the exporters itself when `Start` failed or never ran, since the
+  Coordinator shuts down a participant whose `Start` failed. It no longer dereferences the
+  providers `Start` never built.
+
 ## [v0.1.0] - 2026-09-15
 
 The first release of the observability infrastructure library: the OpenTelemetry configuration
