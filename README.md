@@ -26,7 +26,7 @@ the standard's principles it enhances are stated below. Its repository-level pri
 - The `otlp` sub-module isolates the exporters and the gRPC/protobuf weight every one of them
   pulls in (`go.opentelemetry.io/proto/otlp`, `google.golang.org/grpc`, `google.golang.org/protobuf`,
   and their kin); a consumer that needs only the tracer and meter interfaces never compiles it.
-- Observability never gates readiness: `Telemetry` registers with the process lifecycle through a
+- Observability never gates readiness: `Telemetry` takes part in the process lifecycle through a
   `Start` and a `Shutdown`, and no health check.
 
 ## Design
@@ -57,10 +57,11 @@ collector, and that connection is exactly what is missing when a service is fail
 `filelog` receiver ingests the line. The OpenTelemetry logs pipeline is also still pre-1.0. The
 choice reverses when `otel/log` and its `slog` bridge reach a stable v1.
 
-**Telemetry starts first and stops last.** The composition root registers `Telemetry`'s `Start` and
-`Shutdown` as the lifecycle's startup and shutdown hooks rather than in a numbered stage, so it is
-installed before anything it would instrument starts and flushed after everything drains. It never
-gates readiness: a service that cannot reach its collector still serves traffic.
+**Telemetry starts first and stops last.** `Telemetry` is a go-core `lifecycle.Subsystem`, so the
+composition root makes it a `graph` node's value, and every node it would instrument uses that node
+or orders itself after it with `Scope.After`. Telemetry then sits in a lower layer: it is installed
+before anything it instruments starts and flushed after everything shuts down. It never gates
+readiness: a service that cannot reach its collector still serves traffic.
 
 **Moving to a managed backend** changes only the collector's exporter section. The move needs a
 review of metric temporality (cumulative against delta), attribute cardinality limits, and, once

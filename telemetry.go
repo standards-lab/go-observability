@@ -29,12 +29,14 @@ type Exporters struct {
 // Telemetry is the process's OpenTelemetry lifecycle service. Construction
 // performs no work beyond recording the configuration and exporters; Start
 // builds the resource and the providers and installs them as process
-// globals; Shutdown flushes and releases them. Start and Shutdown carry the
-// lifecycle hook signature, so the composition root registers them as the
-// coordinator's startup and shutdown hooks: Start runs before every stage
-// starts, and Shutdown runs after every stage drains. There is no readiness
-// check: observability never gates readiness, so a collector the service
-// cannot reach is never a reason to fail a probe.
+// globals; Shutdown flushes and releases them. Telemetry implements go-core's
+// lifecycle.Subsystem, so the composition root makes it the value of a graph
+// node and the lifecycle Coordinator starts and shuts it down with no
+// adapter. A node that should run under installed telemetry uses that node,
+// or orders itself after it with Scope.After, so Telemetry sits in a lower
+// layer: it starts before them and shuts down after them. There is no
+// readiness check: observability never gates readiness, so a collector the
+// service cannot reach is never a reason to fail a probe.
 type Telemetry struct {
 	sampleRatio float64
 	attributes  []attribute.KeyValue
@@ -79,7 +81,7 @@ func New(cfg Config, exporters Exporters) *Telemetry {
 // parent-based ratio sampler at the configured ratio; the MeterProvider
 // collects through the metric reader. Both install as the otel globals
 // alongside the W3C TraceContext propagator. The context exists for the
-// lifecycle hook signature; nothing here performs I/O.
+// lifecycle.Starter signature; nothing here performs I/O.
 func (t *Telemetry) Start(ctx context.Context) error {
 	res, err := resource.Merge(resource.Default(), resource.NewSchemaless(t.attributes...))
 	if err != nil {
@@ -104,16 +106,35 @@ func (t *Telemetry) Start(ctx context.Context) error {
 
 // Shutdown shuts down both providers under ctx, which flushes pending spans
 // and metrics to the exporters and releases them, and joins the errors. The
-// lifecycle calls it only after a successful Start, so the providers are
-// always present. The globals stay installed; tracers and meters obtained
-// from them keep working but record nothing.
+// globals stay installed; tracers and meters obtained from them keep working
+// but record nothing.
+//
+// The lifecycle Coordinator also calls Shutdown on a Telemetry whose Start
+// failed or never ran, so that a constructed dependency leaks nothing. Then
+// no provider owns the exporters, and Shutdown releases them directly.
 func (t *Telemetry) Shutdown(ctx context.Context) error {
+	if t.tracerProvider == nil {
+		return t.shutdownExporters(ctx)
+	}
 	var errs []error
 	if err := t.tracerProvider.Shutdown(ctx); err != nil {
 		errs = append(errs, fmt.Errorf("shutdown tracer provider: %w", err))
 	}
 	if err := t.meterProvider.Shutdown(ctx); err != nil {
 		errs = append(errs, fmt.Errorf("shutdown meter provider: %w", err))
+	}
+	return errors.Join(errs...)
+}
+
+// shutdownExporters releases the exporters Start never handed to a provider,
+// and joins the errors.
+func (t *Telemetry) shutdownExporters(ctx context.Context) error {
+	var errs []error
+	if err := t.exporters.Trace.Shutdown(ctx); err != nil {
+		errs = append(errs, fmt.Errorf("shutdown trace exporter: %w", err))
+	}
+	if err := t.exporters.Metric.Shutdown(ctx); err != nil {
+		errs = append(errs, fmt.Errorf("shutdown metric reader: %w", err))
 	}
 	return errors.Join(errs...)
 }
