@@ -16,8 +16,8 @@ covers this sub-module only; the base module keeps its own.
   `event.NewRecorder` take a trailing `reactor.Options` and `event.Options` in place of variadic
   option functions, `reactor.CancelWithin` returns a `time.Duration`, and the
   `reactor.CancelAfter`, `event.Clock`, and `event.IDs` option functions are removed. The
-  exporters' code is unchanged: `Config` and `Exporters`, the base module's types they use, are
-  unchanged in v0.4.0.
+  exporters' code is unchanged, since the base module's `Config` and `Exporters`, which they use,
+  did not change in v0.4.0.
 
 ## [v0.3.0] - 2026-11-11
 

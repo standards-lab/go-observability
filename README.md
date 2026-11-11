@@ -85,8 +85,7 @@ logs move to OTLP, the backend's logs ingestion.
   contract; `Telemetry`, the process lifecycle service that builds the resource and the
   providers; `NewTraceHandler`, the trace-correlating `slog.Handler`; `NewMiddleware`, the HTTP
   server instrumentation; and `RequestIDSource`, the trace-id source `go-web-sdk`'s
-  `middleware.RequestIDOptions` takes as its `Source` field, wired as
-  `middleware.RequestID(middleware.RequestIDOptions{Source: observability.RequestIDSource})`.
+  `middleware.RequestIDOptions` takes as its `Source` field.
 - `otlp` — the gRPC trace and metric exporter constructors, connecting in plain text (TLS is
   deferred until a deployed or managed backend needs it — `otlp`'s own `doc.go` states why).
 
