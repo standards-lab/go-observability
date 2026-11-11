@@ -59,9 +59,9 @@ choice reverses when `otel/log` and its `slog` bridge reach a stable v1.
 
 **Telemetry starts first and stops last.** `Telemetry` is a go-core `lifecycle.Subsystem`, so the
 composition root makes it a `graph` node's value, and every node it would instrument uses that node
-or orders itself after it with `Scope.After`. Telemetry then sits in a lower layer: it is installed
-before anything it instruments starts and flushed after everything shuts down. It never gates
-readiness: a service that cannot reach its collector still serves traffic.
+or orders itself after it with `graph.After` on its `Define` line. Telemetry then sits in a lower
+layer: it is installed before anything it instruments starts and flushed after everything shuts
+down. It never gates readiness: a service that cannot reach its collector still serves traffic.
 
 **Moving to a managed backend** changes only the collector's exporter section. The move needs a
 review of metric temporality (cumulative against delta), attribute cardinality limits, and, once
