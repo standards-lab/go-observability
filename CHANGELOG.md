@@ -7,6 +7,20 @@ module only; the `otlp` sub-module keeps its own.
 
 ## [Unreleased]
 
+## [v0.4.0] - 2026-11-11
+
+### Changed
+
+- **Breaking:** The `go-core` requirement is v0.12.0, which pulls go-core's v0.12.0 breaks into
+  an importer's build: `reactor.New` takes a trailing `reactor.Options` in place of variadic
+  `reactor.Option` values, `reactor.CancelWithin` returns a `time.Duration` for
+  `reactor.Options.CancelAfter`, `event.NewRecorder` takes a trailing `event.Options` in place of
+  variadic `event.Option` values, and the `reactor.CancelAfter`, `event.Clock`, and `event.IDs`
+  option functions are removed.
+- The documentation names go-web-sdk v0.17.0's call form for `RequestIDSource`:
+  `middleware.RequestID(middleware.RequestIDOptions{Source: observability.RequestIDSource})`, in
+  place of the removed `middleware.WithIDSource` option. `RequestIDSource` is unchanged.
+
 ## [v0.3.0] - 2026-11-11
 
 ### Changed
@@ -65,7 +79,8 @@ is released on its own tags.
 - `RequestIDSource` — the `func(*http.Request) string` `go-web-sdk`'s
   `middleware.WithIDSource` takes, returning the request's current trace id or `""` to decline.
 
-[Unreleased]: https://github.com/standards-lab/go-observability/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/standards-lab/go-observability/compare/v0.4.0...HEAD
+[v0.4.0]: https://github.com/standards-lab/go-observability/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/standards-lab/go-observability/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/standards-lab/go-observability/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/standards-lab/go-observability/releases/tag/v0.1.0

@@ -59,10 +59,14 @@
 // # Request-ID source
 //
 // [RequestIDSource] is the func(*http.Request) string go-web-sdk's
-// middleware.WithIDSource takes: it returns the request's current trace id
-// when one is on the request's context, or "" to decline and let
-// middleware.RequestID fall through to its next source. It reads a span
-// already on the request; reaching one depends on the composition root
-// wiring [NewMiddleware] ahead of go-web-sdk's RequestID middleware in the
-// chain. Neither module imports the other.
+// middleware.RequestIDOptions takes as its Source field:
+//
+//	middleware.RequestID(middleware.RequestIDOptions{Source: observability.RequestIDSource})
+//
+// It returns the request's current trace id when one is on the request's
+// context, or "" to decline and let middleware.RequestID fall through to
+// its next source. It reads a span already on the request; reaching one
+// depends on the composition root wiring [NewMiddleware] ahead of
+// go-web-sdk's RequestID middleware in the chain. Neither module imports
+// the other.
 package observability

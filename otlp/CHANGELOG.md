@@ -7,6 +7,18 @@ covers this sub-module only; the base module keeps its own.
 
 ## [Unreleased]
 
+## [v0.4.0] - 2026-11-11
+
+### Changed
+
+- **Breaking:** The `go-observability` requirement is v0.4.0, which requires `go-core` v0.12.0
+  and pulls go-core's v0.12.0 breaks into an importer's build: `reactor.New` and
+  `event.NewRecorder` take a trailing `reactor.Options` and `event.Options` in place of variadic
+  option functions, `reactor.CancelWithin` returns a `time.Duration`, and the
+  `reactor.CancelAfter`, `event.Clock`, and `event.IDs` option functions are removed. The
+  exporters' code is unchanged, since the base module's `Config` and `Exporters`, which they use,
+  did not change in v0.4.0.
+
 ## [v0.3.0] - 2026-11-11
 
 ### Changed
@@ -42,7 +54,8 @@ The first release of the gRPC OTLP exporters, against `github.com/standards-lab/
   which nothing secures with TLS. TLS support is deferred until a deployed or managed backend
   needs it. Both dial lazily, so construction never blocks on a collector that isn't up yet.
 
-[Unreleased]: https://github.com/standards-lab/go-observability/compare/otlp/v0.3.0...HEAD
+[Unreleased]: https://github.com/standards-lab/go-observability/compare/otlp/v0.4.0...HEAD
+[v0.4.0]: https://github.com/standards-lab/go-observability/compare/otlp/v0.3.0...otlp/v0.4.0
 [v0.3.0]: https://github.com/standards-lab/go-observability/compare/otlp/v0.2.0...otlp/v0.3.0
 [v0.2.0]: https://github.com/standards-lab/go-observability/compare/otlp/v0.1.0...otlp/v0.2.0
 [v0.1.0]: https://github.com/standards-lab/go-observability/releases/tag/otlp/v0.1.0

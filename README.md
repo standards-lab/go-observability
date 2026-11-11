@@ -47,10 +47,11 @@ of the base module ends up importing `otlp` too, merging the two back is cheap.
 
 **The request id is the trace id.** OpenTelemetry defines no generic request-id attribute and uses
 the trace context instead. `NewMiddleware` starts the server span, and `RequestIDSource` supplies
-the span's trace id to go-web-sdk's `middleware.RequestID`, which generates its own id for a service
-that composes no tracing. Neither module imports the other. The log handler stamps `trace_id` and
-`span_id` on each record, so log-to-trace links, exemplars, and trace-to-log queries in the backends
-need nothing product-specific from the service.
+the span's trace id to go-web-sdk's `middleware.RequestID` as its `RequestIDOptions.Source`;
+`RequestID` generates its own id for a service that composes no tracing. Neither module imports
+the other. The log handler stamps `trace_id` and `span_id` on each record, so log-to-trace links,
+exemplars, and trace-to-log queries in the backends need nothing product-specific from the
+service.
 
 **Logs go to stdout, not OTLP.** A line written to stdout persists without a live connection to the
 collector, and that connection is exactly what is missing when a service is failing. The collector's
@@ -84,7 +85,7 @@ logs move to OTLP, the backend's logs ingestion.
   contract; `Telemetry`, the process lifecycle service that builds the resource and the
   providers; `NewTraceHandler`, the trace-correlating `slog.Handler`; `NewMiddleware`, the HTTP
   server instrumentation; and `RequestIDSource`, the trace-id source `go-web-sdk`'s
-  `middleware.WithIDSource` takes.
+  `middleware.RequestIDOptions` takes as its `Source` field.
 - `otlp` — the gRPC trace and metric exporter constructors, connecting in plain text (TLS is
   deferred until a deployed or managed backend needs it — `otlp`'s own `doc.go` states why).
 
