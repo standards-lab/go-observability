@@ -14,7 +14,7 @@ module only; the `otlp` sub-module keeps its own.
 - **Breaking:** The `go-core` requirement is v0.12.0, which pulls go-core's v0.12.0 breaks into
   an importer's build: `reactor.New` takes a trailing `reactor.Options` in place of variadic
   `reactor.Option` values, `reactor.CancelWithin` returns a `time.Duration` for
-  `Options.CancelAfter`, `event.NewRecorder` takes a trailing `event.Options` in place of
+  `reactor.Options.CancelAfter`, `event.NewRecorder` takes a trailing `event.Options` in place of
   variadic `event.Option` values, and the `reactor.CancelAfter`, `event.Clock`, and `event.IDs`
   option functions are removed.
 - The documentation names go-web-sdk v0.17.0's call form for `RequestIDSource`:

@@ -7,13 +7,15 @@ import (
 )
 
 // RequestIDSource is the request-ID source function go-web-sdk's
-// middleware.RequestIDOptions takes as its Source field, wired as
-// middleware.RequestID(middleware.RequestIDOptions{Source: observability.RequestIDSource}):
-// it returns the request's current trace id
-// (hex-encoded, the same form NewTraceHandler appends as trace_id) when r's
-// context carries a valid OpenTelemetry span context, or "" otherwise. An
-// empty return declines the request, so middleware.RequestID falls through
-// to its next source rather than getting a trace id.
+// middleware.RequestIDOptions takes as its Source field:
+//
+//	middleware.RequestID(middleware.RequestIDOptions{Source: observability.RequestIDSource})
+//
+// It returns the request's current trace id (hex-encoded, the same form
+// NewTraceHandler appends as trace_id) when r's context carries a valid
+// OpenTelemetry span context, or "" otherwise. An empty return declines the
+// request, so middleware.RequestID falls through to its next source rather
+// than getting a trace id.
 //
 // This function only reads a span already on the request; it never starts
 // one. It reaches a valid span context only when the composition root wires
