@@ -33,10 +33,11 @@ type Exporters struct {
 // lifecycle.Subsystem, so the composition root makes it the value of a graph
 // node and the lifecycle Coordinator starts and shuts it down with no
 // adapter. A node that should run under installed telemetry uses that node,
-// or orders itself after it with Scope.After, so Telemetry sits in a lower
-// layer: it starts before them and shuts down after them. There is no
-// readiness check: observability never gates readiness, so a collector the
-// service cannot reach is never a reason to fail a probe.
+// or orders itself after it with graph.After on its Define line, so
+// Telemetry sits in a lower layer: it starts before them and shuts down
+// after them. There is no readiness check: observability never gates
+// readiness, so a collector the service cannot reach is never a reason to
+// fail a probe.
 type Telemetry struct {
 	sampleRatio float64
 	attributes  []attribute.KeyValue

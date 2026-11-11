@@ -29,10 +29,10 @@
 // TraceContext propagator as process globals; Shutdown flushes and releases
 // them. Telemetry implements go-core's lifecycle.Subsystem, so the
 // composition root makes it a graph node's value, and the nodes it should
-// instrument use it or order themselves after it with Scope.After: it then
-// sits in a lower layer, installed before they start and flushed after they
-// shut down. It has no readiness check: observability never gates
-// readiness.
+// instrument use it or order themselves after it with graph.After on their
+// Define line: it then sits in a lower layer, installed before they start
+// and flushed after they shut down. It has no readiness check:
+// observability never gates readiness.
 //
 // # Log correlation
 //
