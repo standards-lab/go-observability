@@ -7,7 +7,9 @@ import (
 )
 
 // RequestIDSource is the request-ID source function go-web-sdk's
-// middleware.WithIDSource takes: it returns the request's current trace id
+// middleware.RequestIDOptions takes as its Source field, wired as
+// middleware.RequestID(middleware.RequestIDOptions{Source: observability.RequestIDSource}):
+// it returns the request's current trace id
 // (hex-encoded, the same form NewTraceHandler appends as trace_id) when r's
 // context carries a valid OpenTelemetry span context, or "" otherwise. An
 // empty return declines the request, so middleware.RequestID falls through
@@ -18,7 +20,7 @@ import (
 // [NewMiddleware] ahead of go-web-sdk's RequestID middleware in the chain,
 // since that ordering is what puts a span on the request's context in the
 // first place. Neither module imports the other — this is the seam
-// go-web-sdk's WithIDSource exists for.
+// go-web-sdk's RequestIDOptions.Source exists for.
 func RequestIDSource(r *http.Request) string {
 	sc := trace.SpanContextFromContext(r.Context())
 	if !sc.IsValid() {
