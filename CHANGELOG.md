@@ -7,6 +7,21 @@ module only; the `otlp` sub-module keeps its own.
 
 ## [Unreleased]
 
+## [v0.3.0] - 2026-11-11
+
+### Changed
+
+- **Breaking:** The `go-core` requirement is v0.11.0, which pulls go-core's v0.8.0 and v0.11.0
+  breaks into an importer's build: `graph.Scope.After` is removed, so an order-only edge is
+  declared with `graph.After` on the node's `Define` line; `graph.Graph.Observe` takes
+  `func(graph.Ref)` in place of `func(string)`; a node or group name containing a comma or a
+  newline panics; `graph.Dependency` gains a `Ref` field, so an unkeyed composite literal no
+  longer compiles; a `Monitored` value's runtime failure ends the run as
+  `run: <node>: <error>`; and `lifecycle.Coordinator.Checks` holds a `Check` only for a value
+  that is both a `Starter` and a `ReadinessChecker`.
+- The documentation describes a node ordering itself after `Telemetry` with `graph.After` on its
+  `Define` line, in place of the removed `Scope.After`.
+
 ## [v0.2.0] - 2026-10-09
 
 ### Changed
@@ -50,6 +65,7 @@ is released on its own tags.
 - `RequestIDSource` — the `func(*http.Request) string` `go-web-sdk`'s
   `middleware.WithIDSource` takes, returning the request's current trace id or `""` to decline.
 
-[Unreleased]: https://github.com/standards-lab/go-observability/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/standards-lab/go-observability/compare/v0.3.0...HEAD
+[v0.3.0]: https://github.com/standards-lab/go-observability/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/standards-lab/go-observability/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/standards-lab/go-observability/releases/tag/v0.1.0
