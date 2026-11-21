@@ -34,10 +34,9 @@ the standard's principles it enhances are stated below. Its repository-level pri
 **Standard tier only, no provider.** The standard is OpenTelemetry: its API and SDK, its semantic
 conventions, W3C Trace Context propagation, and OTLP on the wire. A backend sits behind the OTLP
 exporter, so nothing about the backend enters the dependency graph, and the library declares no
-provider. The service reaches every backend through an OpenTelemetry collector, locally in front of
-Loki, Tempo, and Mimir and in deployment in front of a managed OTLP endpoint. Naming a backend in
-the collector's exporter configuration is operational configuration, like a connection string, so
-this layer has no native tier.
+provider. A service reaches a backend through an OpenTelemetry collector. Naming a backend in the
+collector's exporter configuration is operational configuration, like a connection string, so this
+layer has no native tier.
 
 **The `otlp` sub-module isolates dependency weight; it does not make the exporter swappable.** Every
 OTLP exporter pulls gRPC, protobuf, grpc-gateway, and genproto, which a consumer of the interfaces
@@ -55,8 +54,8 @@ service.
 
 **Logs go to stdout, not OTLP.** A line written to stdout persists without a live connection to the
 collector, and that connection is exactly what is missing when a service is failing. The collector's
-`filelog` receiver ingests the line. The OpenTelemetry logs pipeline is also still pre-1.0. The
-choice reverses when `otel/log` and its `slog` bridge reach a stable v1.
+`filelog` receiver ingests the line. The `slog` bridge and the OTLP log exporter are still pre-1.0.
+The choice reverses when they reach a stable v1.
 
 **Telemetry starts first and stops last.** `Telemetry` is a go-core `lifecycle.Subsystem`, so the
 composition root makes it a `graph` node's value, and every node it would instrument uses that node
