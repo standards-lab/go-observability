@@ -11,5 +11,5 @@ The judgement calls the standards-reviewer applies to go-observability, beyond w
 - `architecture/standards/go-elemental/principles/baseline-standards.md`: `Config` takes the endpoint, headers, sample ratio, and resource attributes from the application, and `NewMiddleware` and `RequestIDSource` follow OpenTelemetry's conventions alone.
 - `architecture/standards/go-elemental/principles/construction-and-execution.md`: `observability` and `otlp`.
 - `architecture/principles/service-tiers.md`: the `observability` package and the `otlp` exporters.
-- `architecture/principles/context-architecture.md`: the README, `doc.go`, and `otlp/doc.go`.
+- `architecture/principles/context-architecture.md`: the README and each `doc.go`.
 - `architecture/principles/comments.md`: every comment.

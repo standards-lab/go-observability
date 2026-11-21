@@ -4,8 +4,8 @@ The planned OpenTelemetry logs pipeline adds `otel/log`, `otel/sdk/log`, the `sl
 (`otelslog`), and an OTLP log exporter (`otlploggrpc`). Until it is built, logs go to stdout, as
 the README's Design section explains.
 
-**Trigger.** The pipeline is built when `otel/log` and its `slog` bridge reach a stable v1, the
-point at which the README's "Logs go to stdout, not OTLP" choice reverses.
+**Trigger.** The pipeline is built when the `slog` bridge and the OTLP log exporter reach a
+stable v1, the point at which the README's "Logs go to stdout, not OTLP" choice reverses.
 
 **Placement.** The log exporter joins the other OTLP exporters in the `otlp` sub-module, so the
 base module keeps no exporter.
