@@ -3,6 +3,7 @@ package observability
 import (
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 )
@@ -97,9 +98,7 @@ func (c *Config) validate() error {
 	if c.Endpoint == "" {
 		return errors.New("observability endpoint required")
 	}
-	// The negated conjunction rejects NaN, which every ordered comparison
-	// would otherwise let through.
-	if ratio := *c.SampleRatio; !(ratio >= 0 && ratio <= 1) {
+	if ratio := *c.SampleRatio; math.IsNaN(ratio) || ratio < 0 || ratio > 1 {
 		return fmt.Errorf("invalid sample_ratio: %g", ratio)
 	}
 	return nil

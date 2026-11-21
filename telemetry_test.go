@@ -20,12 +20,7 @@ import (
 	"github.com/standards-lab/go-observability"
 )
 
-// A *Telemetry takes part in a lifecycle.Coordinator's startup and shutdown
-// as the Value of a graph.Dependency, with no adapter.
 var _ lifecycle.Subsystem = (*observability.Telemetry)(nil)
-
-// The tests that call Start install process globals in the otel package, so
-// none of them run in parallel and each restores the globals it replaced.
 
 func finalizedConfig(t *testing.T, ratio float64) observability.Config {
 	t.Helper()
@@ -43,27 +38,18 @@ func finalizedConfig(t *testing.T, ratio float64) observability.Config {
 	return cfg
 }
 
-// keepExporter is the SDK's in-memory exporter with Shutdown made a no-op.
-// The batch processor calls the exporter's Shutdown right after its final
-// flush, and InMemoryExporter.Shutdown clears the spans it holds, which
-// would hide the very flush the tests observe.
 type keepExporter struct {
 	*tracetest.InMemoryExporter
 }
 
 func (keepExporter) Shutdown(context.Context) error { return nil }
 
-// testExporters returns the SDK's in-memory doubles: an exporter that keeps
-// the spans it receives and a reader that collects on demand.
 func testExporters() (observability.Exporters, keepExporter, *sdkmetric.ManualReader) {
 	exporter := keepExporter{tracetest.NewInMemoryExporter()}
 	reader := sdkmetric.NewManualReader()
 	return observability.Exporters{Trace: exporter, Metric: reader}, exporter, reader
 }
 
-// restoreGlobals captures the otel globals before a test installs its own
-// and puts them back when the test ends, so no installation leaks into the
-// next test's assertions.
 func restoreGlobals(t *testing.T) {
 	t.Helper()
 	tp := otel.GetTracerProvider()
@@ -76,9 +62,6 @@ func restoreGlobals(t *testing.T) {
 	})
 }
 
-// startTelemetry starts a Telemetry over the in-memory doubles and shuts it
-// down at cleanup; a test that shuts down itself just sees a second, clean
-// no-op.
 func startTelemetry(t *testing.T, ratio float64) (*observability.Telemetry, keepExporter, *sdkmetric.ManualReader) {
 	t.Helper()
 	restoreGlobals(t)
@@ -140,14 +123,9 @@ func TestNew_PanicsOnNilExporters(t *testing.T) {
 }
 
 func TestTelemetry_StartInstallsTraceContextPropagator(t *testing.T) {
-	// The installed providers are proved by the tests below, which reach the
-	// exporters only through the otel globals; this one proves the
-	// propagator by its wire behavior. An earlier test's Start leaves
-	// TraceContext behind the otel package's delegating global, so the test
-	// installs a propagator that injects nothing first: the assertions below
-	// then pass only if Start replaces it.
 	restoreGlobals(t)
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator())
+	injectsNothing := propagation.NewCompositeTextMapPropagator()
+	otel.SetTextMapPropagator(injectsNothing)
 
 	startTelemetry(t, 1)
 
@@ -159,7 +137,6 @@ func TestTelemetry_StartInstallsTraceContextPropagator(t *testing.T) {
 		t.Errorf("injected traceparent = %q, want %q", got, want)
 	}
 
-	// The same propagator extracts an incoming header back into a span context.
 	extracted := trace.SpanContextFromContext(otel.GetTextMapPropagator().Extract(context.Background(), carrier))
 	if extracted.TraceID() != testTraceID || extracted.SpanID() != testSpanID {
 		t.Errorf("extracted span context = %s/%s, want %s/%s",
@@ -170,8 +147,6 @@ func TestTelemetry_StartInstallsTraceContextPropagator(t *testing.T) {
 func TestTelemetry_SpansCarryResourceAndFlushOnShutdown(t *testing.T) {
 	tel, exporter, _ := startTelemetry(t, 1)
 
-	// A span through the global provider reaches the exporter only once the
-	// batcher flushes, which Shutdown forces.
 	_, span := otel.Tracer("test").Start(context.Background(), "op")
 	if !span.IsRecording() {
 		t.Fatal("span not recording under a ratio of 1")
@@ -192,8 +167,6 @@ func TestTelemetry_SpansCarryResourceAndFlushOnShutdown(t *testing.T) {
 	if spans[0].Name != "op" {
 		t.Errorf("span name = %q, want op", spans[0].Name)
 	}
-	// The configured attributes ride the resource, merged over the SDK's
-	// defaults, which contribute the telemetry SDK attributes.
 	wantAttribute(t, spans[0].Resource, "service.name", "app")
 	wantAttribute(t, spans[0].Resource, "service.version", "1.2.3")
 	wantAttribute(t, spans[0].Resource, "telemetry.sdk.language", "go")
@@ -202,8 +175,6 @@ func TestTelemetry_SpansCarryResourceAndFlushOnShutdown(t *testing.T) {
 func TestTelemetry_SamplerHonorsRatio(t *testing.T) {
 	tel, exporter, _ := startTelemetry(t, 0)
 
-	// A ratio of 0 means never sample: the root span records nothing and the
-	// exporter sees nothing after the flush.
 	_, span := otel.Tracer("test").Start(context.Background(), "op")
 	if span.IsRecording() {
 		t.Error("span recording under a ratio of 0")
@@ -248,16 +219,12 @@ func TestTelemetry_ShutdownReleasesReader(t *testing.T) {
 		t.Fatalf("shutdown: %v", err)
 	}
 
-	// The reader is shut down with its provider, so a later collection
-	// fails rather than returning stale data.
 	var rm metricdata.ResourceMetrics
 	if err := reader.Collect(context.Background(), &rm); err == nil {
 		t.Error("collect after shutdown succeeded, want an error")
 	}
 }
 
-// countingExporter is the SDK's in-memory exporter counting its Shutdown
-// calls, so a test sees whether Telemetry released it.
 type countingExporter struct {
 	*tracetest.InMemoryExporter
 	shutdowns int
@@ -269,9 +236,6 @@ func (e *countingExporter) Shutdown(context.Context) error {
 }
 
 func TestTelemetry_ShutdownWithoutStartReleasesExporters(t *testing.T) {
-	// The Coordinator shuts down a participant whose Start failed or never
-	// ran. No provider owns the exporters then, so Shutdown releases them
-	// itself rather than leaking them.
 	exporter := &countingExporter{InMemoryExporter: tracetest.NewInMemoryExporter()}
 	reader := sdkmetric.NewManualReader()
 	tel := observability.New(finalizedConfig(t, 1), observability.Exporters{Trace: exporter, Metric: reader})
@@ -283,7 +247,6 @@ func TestTelemetry_ShutdownWithoutStartReleasesExporters(t *testing.T) {
 	if exporter.shutdowns != 1 {
 		t.Errorf("trace exporter shut down %d times, want 1", exporter.shutdowns)
 	}
-	// A reader shut down once reports ErrReaderShutdown on the next call.
 	if err := reader.Shutdown(context.Background()); !errors.Is(err, sdkmetric.ErrReaderShutdown) {
 		t.Errorf("second reader shutdown = %v, want ErrReaderShutdown", err)
 	}

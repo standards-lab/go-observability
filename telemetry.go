@@ -127,8 +127,6 @@ func (t *Telemetry) Shutdown(ctx context.Context) error {
 	return errors.Join(errs...)
 }
 
-// shutdownExporters releases the exporters Start never handed to a provider,
-// and joins the errors.
 func (t *Telemetry) shutdownExporters(ctx context.Context) error {
 	var errs []error
 	if err := t.exporters.Trace.Shutdown(ctx); err != nil {

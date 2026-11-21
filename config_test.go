@@ -9,8 +9,6 @@ import (
 	"github.com/standards-lab/go-observability"
 )
 
-// validConfig satisfies the one required field; everything else exercises
-// defaults under test.
 func validConfig() observability.Config {
 	return observability.Config{Endpoint: "localhost:4317"}
 }
@@ -29,15 +27,12 @@ func TestConfig_MergeOverlaysSetFields(t *testing.T) {
 	if base.SampleRatio == nil || *base.SampleRatio != 0.25 {
 		t.Errorf("SampleRatio = %v, want 0.25", base.SampleRatio)
 	}
-	// Fields the overlay leaves unset keep the base values.
 	if base.Endpoint != "localhost:4317" {
 		t.Errorf("Endpoint = %s, want localhost:4317", base.Endpoint)
 	}
 }
 
 func TestConfig_MergeExplicitZeroRatioWins(t *testing.T) {
-	// A set zero is a value, not an absence: the overlay's 0 replaces the
-	// base's 1.
 	base := observability.Config{
 		Endpoint:    "localhost:4317",
 		SampleRatio: new(1.0),
@@ -65,7 +60,6 @@ func TestConfig_MergeHeadersKeyWise(t *testing.T) {
 	if got := base.Headers["authorization"]; got != "new" {
 		t.Errorf("Headers[authorization] = %s, want new", got)
 	}
-	// An overlay key overrides without dropping the others.
 	if got := base.Headers["x-tenant"]; got != "acme" {
 		t.Errorf("Headers[x-tenant] = %s, want acme", got)
 	}
@@ -118,9 +112,6 @@ func TestConfig_MergeResourceAttributesOntoNilMap(t *testing.T) {
 }
 
 func TestConfig_JSONZeroRatioIsSet(t *testing.T) {
-	// The pointer distinguishes an explicit 0 in a file from an absent key,
-	// so a layer that says "never sample" is not mistaken for one that says
-	// nothing.
 	var set, unset observability.Config
 	if err := json.Unmarshal([]byte(`{"sample_ratio": 0}`), &set); err != nil {
 		t.Fatalf("Unmarshal: %v", err)
@@ -146,7 +137,6 @@ func TestConfig_FinalizeDefaults(t *testing.T) {
 	if cfg.SampleRatio == nil || *cfg.SampleRatio != 1 {
 		t.Errorf("SampleRatio = %v, want 1", cfg.SampleRatio)
 	}
-	// The maps keep no default: nil means no headers and no attributes.
 	if cfg.Headers != nil {
 		t.Errorf("Headers = %v, want nil", cfg.Headers)
 	}
@@ -185,7 +175,6 @@ func TestConfig_FinalizeEnvOverrides(t *testing.T) {
 }
 
 func TestConfig_FinalizeEnvSuppliesRequiredEndpoint(t *testing.T) {
-	// An override satisfies the required field when no file set it.
 	var cfg observability.Config
 	t.Setenv("TEST_OBSERVABILITY_ENDPOINT", "collector.internal:4317")
 
@@ -211,7 +200,6 @@ func TestConfig_FinalizeMalformedEnvFails(t *testing.T) {
 }
 
 func TestConfig_FinalizeZeroEnvDisablesOverrides(t *testing.T) {
-	// The zero Env names no variables, so ambient values cannot leak in.
 	t.Setenv("TEST_OBSERVABILITY_ENDPOINT", "collector.internal:4317")
 	t.Setenv("TEST_OBSERVABILITY_SAMPLE_RATIO", "0.1")
 
@@ -266,7 +254,6 @@ func TestConfig_Validate(t *testing.T) {
 }
 
 func TestConfig_ValidateAllowsRatioBounds(t *testing.T) {
-	// Both ends of [0, 1] are valid: never sample, and sample everything.
 	for _, ratio := range []float64{0, 1} {
 		cfg := validConfig()
 		cfg.SampleRatio = new(ratio)

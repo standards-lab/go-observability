@@ -6,8 +6,6 @@ import (
 	"github.com/standards-lab/go-observability"
 )
 
-// Every name derives from the prefix through config.EnvName with the
-// "observability" segment; this pins the full set a consumer binds to.
 func TestNewEnv(t *testing.T) {
 	env := observability.NewEnv("app")
 
