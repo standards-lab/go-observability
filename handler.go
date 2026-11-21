@@ -18,7 +18,9 @@ type traceHandler struct {
 // record before handing it to next. Under a context with no valid span, the
 // usual case outside a request, the record passes through unchanged. Enabled,
 // WithAttrs, and WithGroup delegate to next unchanged, so a logger built on
-// the wrapper keeps correlating after With or WithGroup. The intended next is
+// the wrapper keeps correlating after With or WithGroup; under an open group,
+// trace_id and span_id nest inside it like every other attribute added
+// afterward, standard slog.Handler semantics. The intended next is
 // the handler behind go-core's logging.New, obtained from the logger's Handler
 // method, but any slog.Handler works.
 func NewTraceHandler(next slog.Handler) slog.Handler {
