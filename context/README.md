@@ -12,13 +12,7 @@ and the README do not express.
 
 ## Capability map
 
-Every package is built, and its code and `doc.go` are authoritative. Detail for what is unbuilt
-is added when it is about to be built.
-
-- **`Config`** has no protocol field, because `otlp` ships gRPC exporters alone and a field with
-  one valid value would be dead configuration. The field is added if HTTP/protobuf exporters are.
-- **`NewMiddleware`** passes `service.name` as `otelhttp`'s operation name. The default span
-  formatter ignores it; a custom formatter would use it.
-- **The logs pipeline** (`otel/log`, `otel/sdk/log`, the `slog` bridge, and an OTLP log exporter)
-  is planned for when `otel/log` reaches a stable v1. The log exporter will join the other
-  exporters in `otlp`.
+- **`Config`** (built): [config.go](../config.go).
+- **`NewMiddleware`** (built): [middleware.go](../middleware.go).
+- **The logs pipeline** (planned): `otel/log`, `otel/sdk/log`, the `slog` bridge, and an OTLP log
+  exporter in `otlp` ([logs-pipeline.md](logs-pipeline.md)).

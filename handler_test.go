@@ -11,11 +11,6 @@ import (
 	"github.com/standards-lab/go-observability"
 )
 
-// recordingHandler is a slog.Handler double that keeps the last record it
-// received, the attributes bound through WithAttrs, and the groups opened
-// through WithGroup. WithAttrs and WithGroup return copies that share the
-// same capture, so a test inspects one value whichever derived handler the
-// record arrived through.
 type recordingHandler struct {
 	level   slog.Level
 	capture *capture
@@ -57,8 +52,6 @@ var (
 	testSpanID  = trace.SpanID{0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18}
 )
 
-// spanContext returns a context carrying a valid, sampled span context built
-// from the test identifiers.
 func spanContext() context.Context {
 	sc := trace.NewSpanContext(trace.SpanContextConfig{
 		TraceID:    testTraceID,
@@ -68,8 +61,6 @@ func spanContext() context.Context {
 	return trace.ContextWithSpanContext(context.Background(), sc)
 }
 
-// recordAttrs collects a record's attributes into a map keyed by attribute
-// name, so a test asserts on presence and value without walking the record.
 func recordAttrs(record slog.Record) map[string]slog.Value {
 	attrs := make(map[string]slog.Value, record.NumAttrs())
 	record.Attrs(func(a slog.Attr) bool {

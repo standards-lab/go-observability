@@ -12,3 +12,4 @@ The judgement calls the standards-reviewer applies to go-observability, beyond w
 - `architecture/standards/go-elemental/principles/construction-and-execution.md`: every new exported function and constructor in `observability` and `otlp`.
 - `architecture/principles/service-tiers.md`: the `observability` package and the `otlp` exporters.
 - `architecture/principles/context-architecture.md`: the README and each `doc.go` are the homes.
+- `architecture/principles/comments.md`: every comment is one of the five kinds, in source, tests, scripts, and every configuration file (TOML, YAML, `.gitignore`).

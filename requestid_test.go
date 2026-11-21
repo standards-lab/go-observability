@@ -26,8 +26,6 @@ func TestRequestIDSource_ReturnsEmptyWithoutSpan(t *testing.T) {
 }
 
 func TestRequestIDSource_ReturnsEmptyUnderInvalidSpanContext(t *testing.T) {
-	// A span context can be present but invalid, e.g. a zero TraceID from a
-	// malformed traceparent header the propagator declined to extract.
 	sc := trace.NewSpanContext(trace.SpanContextConfig{})
 	req := httptest.NewRequest("GET", "/", nil).WithContext(
 		trace.ContextWithSpanContext(t.Context(), sc),

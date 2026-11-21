@@ -22,13 +22,8 @@ import (
 	"github.com/standards-lab/go-observability/otlp"
 )
 
-// The tests build their own providers over the exporters rather than
-// installing otel globals, so they run in parallel.
-
 const testTimeout = 5 * time.Second
 
-// testContext returns a context bounded by testTimeout, so a hang in the
-// exporter fails the test instead of the whole run.
 func testContext(t *testing.T) context.Context {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(t.Context(), testTimeout)
@@ -36,11 +31,6 @@ func testContext(t *testing.T) context.Context {
 	return ctx
 }
 
-// traceCollector and metricsCollector are the two halves of an in-process
-// OTLP collector: each implements one collector service, records what it
-// receives, and keeps the request metadata so a test can see the headers the
-// exporter sent. They are two types because both service interfaces name
-// their method Export with different signatures.
 type traceCollector struct {
 	coltracepb.UnimplementedTraceServiceServer
 	mu      sync.Mutex
@@ -99,9 +89,6 @@ func (c *metricsCollector) metricNames() []string {
 	return names
 }
 
-// startCollector serves both collector services on a loopback listener and
-// returns its address, the form Config.Endpoint takes, alongside the two
-// recorders. The server stops at cleanup.
 func startCollector(t *testing.T) (string, *traceCollector, *metricsCollector) {
 	t.Helper()
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
@@ -147,8 +134,6 @@ func TestNewMetricExporter_RequiresEndpoint(t *testing.T) {
 	}
 }
 
-// The constructors dial lazily, so construction and shutdown both succeed
-// against an endpoint nothing listens on.
 func TestNewTraceExporter_ConstructsAndShutsDownWithoutCollector(t *testing.T) {
 	t.Parallel()
 	ctx := testContext(t)
@@ -179,8 +164,6 @@ func TestNewMetricExporter_ConstructsAndShutsDownWithoutCollector(t *testing.T) 
 	}
 }
 
-// A span ended under a synchronous processor reaches the in-process
-// collector over the wire, carrying the configured headers.
 func TestNewTraceExporter_ExportsToCollector(t *testing.T) {
 	t.Parallel()
 	ctx := testContext(t)
@@ -207,8 +190,6 @@ func TestNewTraceExporter_ExportsToCollector(t *testing.T) {
 	wantHeader(t, tc.headers, "x-test-token", "secret")
 }
 
-// A measurement flushed through a periodic reader over the exporter reaches
-// the in-process collector over the wire, carrying the configured headers.
 func TestNewMetricExporter_ExportsToCollector(t *testing.T) {
 	t.Parallel()
 	ctx := testContext(t)
@@ -228,9 +209,6 @@ func TestNewMetricExporter_ExportsToCollector(t *testing.T) {
 		t.Fatalf("counter: %v", err)
 	}
 	counter.Add(ctx, 1)
-	// Shutdown collects and exports once more before releasing the reader;
-	// that final collect is the one export here. A ForceFlush ahead of it
-	// would export the cumulative counter a second time.
 	if err := mp.Shutdown(ctx); err != nil {
 		t.Fatalf("shutdown meter provider: %v", err)
 	}

@@ -14,12 +14,6 @@ import (
 	"github.com/standards-lab/go-observability"
 )
 
-// The tests that start Telemetry install process globals, so none of them
-// run in parallel; see telemetry_test.go.
-
-// serveThrough sends a GET for path through mw around a mux that serves the
-// "GET /users/{id}" pattern with a 202 and a fixed body, so the span name
-// carries the route, and returns the recorded response.
 func serveThrough(t *testing.T, mw func(http.Handler) http.Handler, req *http.Request) *httptest.ResponseRecorder {
 	t.Helper()
 	mux := http.NewServeMux()
@@ -54,7 +48,6 @@ func TestNewMiddleware_InstrumentsRequests(t *testing.T) {
 	tel, exporter, reader := startTelemetry(t, 1)
 	mw := observability.NewMiddleware(finalizedConfig(t, 1))
 
-	// The incoming traceparent names the trace the server span continues.
 	const traceID = "0af7651916cd43dd8448eb211c80319c"
 	const parentSpanID = "b7ad6b7169203331"
 	req := httptest.NewRequest(http.MethodGet, "/users/42", nil)
@@ -63,9 +56,6 @@ func TestNewMiddleware_InstrumentsRequests(t *testing.T) {
 	rec := serveThrough(t, mw, req)
 	wantResponse(t, rec)
 
-	// Metrics collect through the reader, which Shutdown releases, so they
-	// are read first; spans reach the exporter only on the flush Shutdown
-	// forces.
 	var rm metricdata.ResourceMetrics
 	if err := reader.Collect(context.Background(), &rm); err != nil {
 		t.Fatalf("collect: %v", err)
@@ -99,14 +89,11 @@ func TestNewMiddleware_InstrumentsRequests(t *testing.T) {
 }
 
 func TestNewMiddleware_ConstructedBeforeStartStillInstruments(t *testing.T) {
-	// The premise: no real provider is installed when the middleware is
-	// built, so a span started through the globals records nothing.
 	if _, span := otel.Tracer("premise").Start(context.Background(), "premise"); span.IsRecording() {
 		t.Fatal("a recording TracerProvider is installed before construction; the test would prove nothing")
 	}
 	mw := observability.NewMiddleware(finalizedConfig(t, 1))
 
-	// startTelemetry restores the globals it installs at cleanup.
 	tel, exporter, _ := startTelemetry(t, 1)
 
 	rec := serveThrough(t, mw, httptest.NewRequest(http.MethodGet, "/users/42", nil))
