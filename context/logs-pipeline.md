@@ -12,6 +12,5 @@ base module keeps no exporter.
 
 ## Open questions for the plan
 
-- `otel/log` is at v1.47.0, but the `slog` bridge (`otelslog`, v0.21.0) and `otlploggrpc`
-  (v0.23.0) are pre-v1. Does the trigger wait for both to reach v1, or admit them as v0
-  exceptions, as `otelhttp` is admitted?
+- `otel/log` is v1; the `slog` bridge and `otlploggrpc` are pre-v1. Does the trigger wait for both
+  to reach v1, or admit them as v0 exceptions, as `otelhttp` is admitted?

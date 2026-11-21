@@ -12,7 +12,8 @@ and the README do not express.
 
 ## Capability map
 
-- **`Config`** (built): [config.go](../config.go).
-- **`NewMiddleware`** (built): [middleware.go](../middleware.go).
+- **observability** (built): configuration, the telemetry lifecycle, the trace-correlating log
+  handler, the HTTP middleware, and the request-ID source ([doc.go](../doc.go)).
+- **otlp** (built): the gRPC trace and metric exporters ([otlp/doc.go](../otlp/doc.go)).
 - **The logs pipeline** (planned): `otel/log`, `otel/sdk/log`, the `slog` bridge, and an OTLP log
   exporter in `otlp` ([logs-pipeline.md](logs-pipeline.md)).
